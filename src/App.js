@@ -50,9 +50,16 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
+const key = "8458f294";
+
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
+  const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
+
+  // this is how we should not fetch data in react Note
+  // fetch(`http://www.omdbapi.com/?apikey=${key}&s=jannat`)
+  //   .then((res) => res.json())
+  //   .then((data) => console.log(data.Search));
 
   return (
     <>
