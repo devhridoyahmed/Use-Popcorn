@@ -51,8 +51,8 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const key = "8458f294";
-const key2 = "ff7980e4";
+const KEY = "8458f294";
+const KEY2 = "ff7980e4";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -93,7 +93,7 @@ export default function App() {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${key}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
           );
 
           if (!res.ok)
@@ -144,6 +144,7 @@ export default function App() {
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
               onAddWatched={handleAddWatched}
+              watched={watched}
             />
           ) : (
             <>
@@ -302,10 +303,16 @@ function WatchedSummary({ watched }) {
   );
 }
 
-function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [userRating, setUserRating] = useState('')
+  const [userRating, setUserRating] = useState("");
+
+  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
+  const watchedUserRating = watched.find(
+    (movie) => movie.imdbID === selectedId
+  )?.userRating;
+  // console.log(watched, isWatched);
 
   const {
     Title: title,
@@ -322,14 +329,13 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
 
   function handleAdd() {
     const newWatchedMovie = {
-      imdbId: selectedId,
+      imdbID: selectedId,
       title,
       year,
       poster,
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
-
     };
 
     onAddWatched(newWatchedMovie);
@@ -341,7 +347,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
       async function getMovieDetails() {
         setIsLoading(true);
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${key}&i=${selectedId}`
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
         );
         const data = await res.json();
         setMovie(data);
@@ -378,10 +384,23 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
 
           <section>
             <div className="rating">
-              <StarRating maxRating={10} size={24} onSetRating={setUserRating}/>
-              {userRating > 0 && <button className="btn-add" onClick={handleAdd} >
-                + Add to List
-              </button>}
+              {!isWatched ? (
+                <>
+                  {" "}
+                  <StarRating
+                    maxRating={10}
+                    size={24}
+                    onSetRating={setUserRating}
+                  />
+                  {userRating > 0 && (
+                    <button className="btn-add" onClick={handleAdd}>
+                      + Add to List
+                    </button>
+                  )}{" "}
+                </>
+              ) : (
+                <p>You rated with movie </p>
+              )}
             </div>
             <p>
               <em>{plot}</em>
@@ -414,7 +433,7 @@ function WatchedMovie({ movie }) {
       <div>
         <p>
           <span>⭐️</span>
-          <span>{movie.imdbRating}</span>
+          <span>{movie.imdbID}</span>
         </p>
         <p>
           <span>🌟</span>
