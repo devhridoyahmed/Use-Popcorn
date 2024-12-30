@@ -111,7 +111,7 @@ export default function App() {
 
           setMovies(data.Search);
         } catch (err) {
-          console.error(err.message);
+          console.log(err.message);
 
           if (err.name !== "AbortError") {
             setError(err.message);
@@ -125,6 +125,7 @@ export default function App() {
         setError("");
         return;
       }
+      handleCloseMovie(); 
       fetchMovies();
 
       return function () {
@@ -361,6 +362,24 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   useEffect(
     function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+          // console.log("closing");
+        }
+      }
+
+      document.addEventListener("keydown", callback);
+
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie]
+  );
+
+  useEffect(
+    function () {
       async function getMovieDetails() {
         setIsLoading(true);
         const res = await fetch(
@@ -382,7 +401,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
       return function () {
         document.title = `usePorcorn`;
-        console.log(`clean up effect for movie ${title}`);
+        // console.log(`clean up effect for movie ${title}`);
       };
     },
     [title]
