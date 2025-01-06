@@ -57,10 +57,15 @@ const KEY2 = "ff7980e4";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+
+  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
 
   // to ensure latest selectedId data, we passed selectedId in this callback function
   function handleSelectMovie(id) {
@@ -73,11 +78,20 @@ export default function App() {
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
+
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]))
   }
 
   function handleDeleteMovie(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   // this is how we should not fetch data in react Note
   // fetch(`http://www.omdbapi.com/?apikey=${key}&s=jannat`)
@@ -125,7 +139,7 @@ export default function App() {
         setError("");
         return;
       }
-      handleCloseMovie(); 
+      handleCloseMovie();
       fetchMovies();
 
       return function () {
@@ -345,6 +359,15 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     Genre: genre,
   } = movie;
 
+  // if (imdbRating > 8) [isTop, setIsTop] = useState("true")
+
+  // if (imdbRating > 8) return <p>Greatest Ever!</p>
+
+  // const isTop = imdbRating > 8;
+  // console.log(isTop);
+
+  // const [avgRating, setAvgRating] = useState(0)
+
   function handleAdd() {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -358,6 +381,9 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
     onAddWatched(newWatchedMovie);
     onCloseMovie();
+
+    // setAvgRating(Number(imdbRating))
+    // setAvgRating((avgRating) => (userRating+avgRating) / 2)
   }
 
   useEffect(
@@ -430,6 +456,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               </p>
             </div>
           </header>
+
+          {/* <p>{avgRating}</p> */}
 
           <section>
             <div className="rating">
