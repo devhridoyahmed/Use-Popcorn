@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
 
 const tempMovieData = [
   {
@@ -58,14 +59,15 @@ const KEY2 = "ff7980e4";
 export default function App() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const { movies, isLoading, error } = useMovies(query);
 
-  const {movies, isLoading, error} = useMovies(query);
+  const [watched, setWatched] = useLocalStorageState([], "watched");
 
   // const [watched, setWatched] = useState([]);
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
-  });
+  // const [watched, setWatched] = useState(function () {
+  //   const storedValue = localStorage.getItem("watched");
+  //   return JSON.parse(storedValue);
+  // });
 
   // to ensure latest selectedId data, we passed selectedId in this callback function
   function handleSelectMovie(id) {
@@ -86,13 +88,6 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
-
   // this is how we should not fetch data in react Note
   // fetch(`http://www.omdbapi.com/?apikey=${key}&s=jannat`)
   //   .then((res) => res.json())
@@ -103,8 +98,6 @@ export default function App() {
   //     .then((res) => res.json())
   //     .then((data) => setMovies(data.Search));
   // }, []);
-
-  
 
   return (
     <>
@@ -337,7 +330,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     (movie) => movie.imdbID === selectedId
   )?.userRating;
 
-  console.log(watchedUserRating);
   // console.log(watched, isWatched);
 
   const {
